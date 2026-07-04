@@ -1,0 +1,29 @@
+nav {
+  display: flex;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid #e5e4e7;
+  margin-bottom: 24px;
+}
+
+form > div {
+  margin-bottom: 12px;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+li {
+  padding: 12px;
+  border: 1px solid #e5e4e7;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
