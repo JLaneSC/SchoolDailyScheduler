@@ -2,6 +2,7 @@ import { Link, Route, Routes } from 'react-router-dom'
 import { StudentsPage } from './features/students/StudentsPage'
 import { StudentDetailPage } from './features/students/StudentDetailPage'
 import { SubjectsPage } from './features/subjects/SubjectsPage'
+import { SupplyListPage } from './features/supplyList/SupplyListPage'
 import { SubjectPatternsPage } from './features/schedule/SubjectPatternsPage'
 import { SchoolYearPage } from './features/schedule/SchoolYearPage'
 import { CalendarPage, CalendarRedirect } from './features/schedule/CalendarPage'
@@ -15,6 +16,7 @@ function App() {
       <nav>
         <Link to="/">Students</Link>
         <Link to="/subjects">Subjects</Link>
+        <Link to="/supply-list">Supply List</Link>
         <Link to="/settings">Settings</Link>
       </nav>
 
@@ -33,6 +35,7 @@ function App() {
           element={<DayDetailPage />}
         />
         <Route path="/subjects" element={<SubjectsPage />} />
+        <Route path="/supply-list" element={<SupplyListPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </>

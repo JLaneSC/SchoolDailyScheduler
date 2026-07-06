@@ -59,7 +59,21 @@ export async function getScheduleEntriesForMonth(studentId, year, month) {
     .order('scheduled_date', { ascending: true })
 
   if (error) throw error
-  return data
+  if (data.length === 0) return data
+
+  const entryIds = data.map((entry) => entry.id)
+  const { data: notes, error: notesError } = await supabase
+    .from('progress_entries')
+    .select('*')
+    .in('schedule_entry_id', entryIds)
+
+  if (notesError) throw notesError
+
+  const notesByEntryId = new Map(notes.map((note) => [note.schedule_entry_id, note]))
+  return data.map((entry) => ({
+    ...entry,
+    progressNote: notesByEntryId.get(entry.id) ?? null,
+  }))
 }
 
 export async function updateScheduleEntryStatus(id, status) {

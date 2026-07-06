@@ -1,8 +1,8 @@
 import { Link, useParams } from 'react-router-dom'
 import { useScheduleEntries } from './useScheduleEntries'
 import { useUpdateScheduleEntryStatus } from './useUpdateScheduleEntryStatus'
-
-const STATUSES = ['planned', 'completed', 'skipped']
+import { useProgressNotes } from './useProgressNotes'
+import { DayScheduleEntryItem } from './DayScheduleEntryItem'
 
 export function DayDetailPage() {
   const { studentId, year, month, day } = useParams()
@@ -16,6 +16,7 @@ export function DayDetailPage() {
     numericMonth
   )
   const updateStatus = useUpdateScheduleEntryStatus(studentId, numericYear, numericMonth)
+  const { upsertNote } = useProgressNotes(studentId, numericYear, numericMonth)
 
   const dayEntries = entries.filter((entry) => entry.scheduled_date === dateStr)
 
@@ -36,23 +37,12 @@ export function DayDetailPage() {
 
       <ul>
         {dayEntries.map((entry) => (
-          <li key={entry.id}>
-            <strong>{entry.subjects?.name ?? 'Subject'}</strong>
-            {entry.day_number && <span> (day {entry.day_number})</span>}
-            <div>
-              {STATUSES.map((status) => (
-                <label key={status}>
-                  <input
-                    type="radio"
-                    name={`status-${entry.id}`}
-                    checked={entry.status === status}
-                    onChange={() => updateStatus.mutate({ id: entry.id, status })}
-                  />
-                  {status}
-                </label>
-              ))}
-            </div>
-          </li>
+          <DayScheduleEntryItem
+            key={entry.id}
+            entry={entry}
+            onUpdateStatus={updateStatus.mutate}
+            onUpsertNote={upsertNote}
+          />
         ))}
       </ul>
     </section>
