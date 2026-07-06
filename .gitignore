@@ -18,9 +18,11 @@ dist-ssr
 .env.*.local
 
 # Source reference material kept local-only (not code, not needed by other
-# contributors/CI); parsed/structured data derived from these gets committed
-# separately once the standards-ingestion feature exists.
+# contributors/CI, and often containing personal/student information); parsed/
+# structured data derived from these gets committed separately once the
+# relevant ingestion feature exists.
 /6SC DOE LEARNING STANDARDS/
+/reference/
 
 # Editor directories and files
 .vscode/*

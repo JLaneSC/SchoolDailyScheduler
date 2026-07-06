@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { StudentForm } from './StudentForm'
 
 export function StudentListItem({ student, onUpdate, onDelete }) {
@@ -25,6 +26,7 @@ export function StudentListItem({ student, onUpdate, onDelete }) {
       <strong>{student.name}</strong> &mdash; {student.grade_level}
       {student.birth_date && <span> &middot; born {student.birth_date}</span>}
       {student.notes && <p>{student.notes}</p>}
+      <Link to={`/students/${student.id}`}>View schedule</Link>
       <button type="button" onClick={() => setIsEditing(true)}>
         Edit
       </button>
