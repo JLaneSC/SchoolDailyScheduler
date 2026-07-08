@@ -3,6 +3,8 @@ import { StudentsPage } from './features/students/StudentsPage'
 import { StudentDetailPage } from './features/students/StudentDetailPage'
 import { SubjectsPage } from './features/subjects/SubjectsPage'
 import { SupplyListPage } from './features/supplyList/SupplyListPage'
+import { GradeBandsPage } from './features/gradeBands/GradeBandsPage'
+import { StandardsPage } from './features/standards/StandardsPage'
 import { SubjectPatternsPage } from './features/schedule/SubjectPatternsPage'
 import { SchoolYearPage } from './features/schedule/SchoolYearPage'
 import { CalendarPage, CalendarRedirect } from './features/schedule/CalendarPage'
@@ -17,6 +19,8 @@ function App() {
         <Link to="/">Students</Link>
         <Link to="/subjects">Subjects</Link>
         <Link to="/supply-list">Supply List</Link>
+        <Link to="/grade-bands">Grade Bands</Link>
+        <Link to="/standards">Standards</Link>
         <Link to="/settings">Settings</Link>
       </nav>
 
@@ -36,6 +40,8 @@ function App() {
         />
         <Route path="/subjects" element={<SubjectsPage />} />
         <Route path="/supply-list" element={<SupplyListPage />} />
+        <Route path="/grade-bands" element={<GradeBandsPage />} />
+        <Route path="/standards" element={<StandardsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </>
