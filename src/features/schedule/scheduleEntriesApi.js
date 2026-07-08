@@ -87,3 +87,15 @@ export async function updateScheduleEntryStatus(id, status) {
   if (error) throw error
   return data
 }
+
+export async function saveActivityPlan(id, activityPlan) {
+  const { data, error } = await supabase
+    .from('schedule_entries')
+    .update({ activity_plan: activityPlan, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}

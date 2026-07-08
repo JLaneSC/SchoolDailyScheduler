@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useScheduleEntries } from './useScheduleEntries'
 import { useUpdateScheduleEntryStatus } from './useUpdateScheduleEntryStatus'
 import { useProgressNotes } from './useProgressNotes'
+import { useAiSuggestions } from './useAiSuggestions'
+import { useSaveActivityPlan } from './useSaveActivityPlan'
 import { DayScheduleEntryItem } from './DayScheduleEntryItem'
 
 export function DayDetailPage() {
@@ -17,8 +20,35 @@ export function DayDetailPage() {
   )
   const updateStatus = useUpdateScheduleEntryStatus(studentId, numericYear, numericMonth)
   const { upsertNote } = useProgressNotes(studentId, numericYear, numericMonth)
+  const { generateSuggestions, isGenerating, generateError } = useAiSuggestions()
+  const saveActivityPlan = useSaveActivityPlan(studentId, numericYear, numericMonth)
+
+  const [suggestions, setSuggestions] = useState(new Map())
+  const [suggestionMessage, setSuggestionMessage] = useState(null)
 
   const dayEntries = entries.filter((entry) => entry.scheduled_date === dateStr)
+
+  function discardSuggestion(entryId) {
+    setSuggestions((prev) => {
+      const next = new Map(prev)
+      next.delete(entryId)
+      return next
+    })
+  }
+
+  async function handleGenerateSuggestions() {
+    setSuggestionMessage(null)
+    const result = await generateSuggestions({ studentId, targetDate: dateStr })
+    setSuggestions(
+      new Map((result.suggestions ?? []).map((s) => [s.scheduleEntryId, s.suggestedActivity]))
+    )
+    if (result.message) setSuggestionMessage(result.message)
+  }
+
+  async function handleSaveActivityPlan({ id, activityPlan }) {
+    await saveActivityPlan.mutateAsync({ id, activityPlan })
+    discardSuggestion(id)
+  }
 
   return (
     <section>
@@ -35,6 +65,18 @@ export function DayDetailPage() {
         <p>No subjects scheduled this day.</p>
       )}
 
+      {!isLoading && !error && dayEntries.length > 0 && (
+        <div>
+          <button type="button" onClick={handleGenerateSuggestions} disabled={isGenerating}>
+            {isGenerating ? 'Generating...' : "Suggest activities from yesterday's notes"}
+          </button>
+          {generateError && (
+            <p role="alert">Could not generate suggestions: {generateError.message}</p>
+          )}
+          {suggestionMessage && <p>{suggestionMessage}</p>}
+        </div>
+      )}
+
       <ul>
         {dayEntries.map((entry) => (
           <DayScheduleEntryItem
@@ -42,6 +84,9 @@ export function DayDetailPage() {
             entry={entry}
             onUpdateStatus={updateStatus.mutate}
             onUpsertNote={upsertNote}
+            suggestedActivity={suggestions.get(entry.id)}
+            onSaveActivityPlan={handleSaveActivityPlan}
+            onDiscardSuggestion={discardSuggestion}
           />
         ))}
       </ul>
