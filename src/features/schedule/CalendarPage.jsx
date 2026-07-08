@@ -2,6 +2,8 @@ import { useMemo } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useScheduleEntries } from './useScheduleEntries'
 import { MonthGrid } from './MonthGrid'
+import { buildIcsCalendar, buildMarkdownDocument } from './exportFormats'
+import { downloadFile } from '../../lib/downloadFile'
 
 export function CalendarRedirect() {
   const { studentId } = useParams()
@@ -48,6 +50,24 @@ export function CalendarPage() {
     navigate(`/students/${studentId}/schedule/${numericYear}/${numericMonth}/${day}`)
   }
 
+  function handleExportIcs() {
+    const ics = buildIcsCalendar(entries, { studentId })
+    downloadFile(
+      `schedule-${numericYear}-${String(numericMonth).padStart(2, '0')}.ics`,
+      ics,
+      'text/calendar;charset=utf-8'
+    )
+  }
+
+  function handleExportMarkdown() {
+    const markdown = buildMarkdownDocument(entries, { year: numericYear, month: numericMonth })
+    downloadFile(
+      `schedule-${numericYear}-${String(numericMonth).padStart(2, '0')}.md`,
+      markdown,
+      'text/markdown;charset=utf-8'
+    )
+  }
+
   return (
     <section>
       <h1>
@@ -58,6 +78,16 @@ export function CalendarPage() {
       </button>
       <button type="button" onClick={() => goToMonth(1)}>
         Next month
+      </button>
+      <button type="button" onClick={handleExportIcs} disabled={isLoading || entries.length === 0}>
+        Export as Calendar (.ics)
+      </button>
+      <button
+        type="button"
+        onClick={handleExportMarkdown}
+        disabled={isLoading || entries.length === 0}
+      >
+        Export as Markdown
       </button>
 
       {isLoading && <p>Loading schedule...</p>}
