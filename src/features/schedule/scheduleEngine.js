@@ -124,7 +124,8 @@ export function computeScheduleDiff({
   const existingByKey = new Map(
     existingEntries.map((entry) => [`${entry.scheduled_date}|${entry.subject_id}`, entry])
   )
-  const isProtected = (entry) => entry.status !== 'planned' || entry.hasProgressNote
+  const isProtected = (entry) =>
+    entry.status !== 'planned' || entry.hasProgressNote || entry.hasApprovedStandardLinks
 
   const toInsert = []
   const toUpdateDayNumber = []

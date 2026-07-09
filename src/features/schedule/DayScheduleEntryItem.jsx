@@ -42,6 +42,11 @@ export function DayScheduleEntryItem({
     <li>
       <strong>{entry.subjects?.name ?? 'Subject'}</strong>
       {entry.day_number && <span> (day {entry.day_number})</span>}
+      {entry.approvedStandards?.length > 0 && (
+        <div>
+          Standards: {entry.approvedStandards.map((s) => s.code).join(', ')}
+        </div>
+      )}
       <div>
         {STATUSES.map((status) => (
           <label key={status}>

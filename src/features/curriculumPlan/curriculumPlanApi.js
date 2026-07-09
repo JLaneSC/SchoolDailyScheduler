@@ -120,3 +120,43 @@ export async function matchApprovedStandardByCode(code) {
   if (error) throw error
   return data?.id ?? null
 }
+
+// Used by Milestone 8's standard-distribution proposal to build the closed
+// candidate list for one subject/month from curriculum_plan_entries'
+// free-text standards_text. Splits on comma/semicolon and exact-matches
+// each plain code against approved standards for that subject. An en-dash
+// range token (e.g. "3.NR.2.1–2.6") is NOT auto-expanded — it's returned in
+// unmatchedTokens, requiring manual selection in the review UI rather than
+// a guessed range-expansion rule.
+export async function matchApprovedStandardCodesForText(subjectId, standardsText) {
+  if (!standardsText) return { matchedStandards: [], unmatchedTokens: [] }
+
+  const tokens = standardsText
+    .split(/[,;]/)
+    .map((token) => token.trim())
+    .filter(Boolean)
+
+  const plainTokens = tokens.filter((token) => !token.includes('–'))
+  const rangeTokens = tokens.filter((token) => token.includes('–'))
+
+  if (plainTokens.length === 0) {
+    return { matchedStandards: [], unmatchedTokens: rangeTokens }
+  }
+
+  const { data, error } = await supabase
+    .from('standards')
+    .select('id, code, description')
+    .eq('subject_id', subjectId)
+    .eq('status', 'approved')
+    .in('code', plainTokens)
+
+  if (error) throw error
+
+  const matchedCodes = new Set(data.map((standard) => standard.code))
+  const unmatchedTokens = [
+    ...plainTokens.filter((token) => !matchedCodes.has(token)),
+    ...rangeTokens,
+  ]
+
+  return { matchedStandards: data, unmatchedTokens }
+}

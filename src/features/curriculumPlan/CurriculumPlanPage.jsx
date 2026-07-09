@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useCurriculumPlan } from './useCurriculumPlan'
 import { useExtractCurriculumPlan } from './useExtractCurriculumPlan'
 import { useSaveCurriculumPlanEntries } from './useSaveCurriculumPlanEntries'
@@ -30,7 +30,15 @@ function groupByMonthThenSubject(entries) {
     const monthLabel = `${MONTH_NAMES[entry.month - 1]} ${entry.year}`
     const subjectName = entry.subjects?.name ?? 'Unknown subject'
     const key = `${monthKey}||${subjectName}`
-    const group = groups.get(key) ?? { monthKey, monthLabel, subjectName, items: [] }
+    const group = groups.get(key) ?? {
+      monthKey,
+      monthLabel,
+      subjectName,
+      subjectId: entry.subject_id,
+      year: entry.year,
+      month: entry.month,
+      items: [],
+    }
     group.items.push(entry)
     groups.set(key, group)
   }
@@ -162,6 +170,13 @@ export function CurriculumPlanPage() {
           <h3>
             {group.monthLabel} &mdash; {group.subjectName}
           </h3>
+          <p>
+            <Link
+              to={`/students/${studentId}/standard-distribution?subjectId=${group.subjectId}&year=${group.year}&month=${group.month}`}
+            >
+              Distribute standards to days &rarr;
+            </Link>
+          </p>
           <ul>
             {group.items.map((entry) => (
               <li key={entry.id}>

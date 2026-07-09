@@ -17,8 +17,21 @@ export async function getScheduleEntriesForSchoolYear(schoolYearId) {
 
   if (progressError) throw progressError
 
+  const { data: standardLinks, error: standardLinksError } = await supabase
+    .from('schedule_entry_standards')
+    .select('schedule_entry_id')
+    .eq('status', 'approved')
+    .in('schedule_entry_id', entryIds)
+
+  if (standardLinksError) throw standardLinksError
+
   const linkedIds = new Set(progressLinks.map((link) => link.schedule_entry_id))
-  return entries.map((entry) => ({ ...entry, hasProgressNote: linkedIds.has(entry.id) }))
+  const standardLinkedIds = new Set(standardLinks.map((link) => link.schedule_entry_id))
+  return entries.map((entry) => ({
+    ...entry,
+    hasProgressNote: linkedIds.has(entry.id),
+    hasApprovedStandardLinks: standardLinkedIds.has(entry.id),
+  }))
 }
 
 export async function applyScheduleDiff({ toInsert, toUpdateDayNumber, toDelete }) {
@@ -69,10 +82,26 @@ export async function getScheduleEntriesForMonth(studentId, year, month) {
 
   if (notesError) throw notesError
 
+  const { data: standardLinks, error: standardLinksError } = await supabase
+    .from('schedule_entry_standards')
+    .select('schedule_entry_id, standards(id, code, description)')
+    .eq('status', 'approved')
+    .in('schedule_entry_id', entryIds)
+
+  if (standardLinksError) throw standardLinksError
+
   const notesByEntryId = new Map(notes.map((note) => [note.schedule_entry_id, note]))
+  const standardsByEntryId = new Map()
+  for (const link of standardLinks) {
+    const list = standardsByEntryId.get(link.schedule_entry_id) ?? []
+    list.push(link.standards)
+    standardsByEntryId.set(link.schedule_entry_id, list)
+  }
+
   return data.map((entry) => ({
     ...entry,
     progressNote: notesByEntryId.get(entry.id) ?? null,
+    approvedStandards: standardsByEntryId.get(entry.id) ?? [],
   }))
 }
 
