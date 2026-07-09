@@ -46,6 +46,46 @@ export async function insertPendingLinks(rows) {
   return data
 }
 
+// Used by Milestone 9's decision-gate apply step: the teacher's explicit
+// choice (replacement/blend) IS the confirmation event, so links are
+// inserted directly as approved rather than going through another
+// pending_review round-trip. Ignores rows that already exist for that
+// (scheduleEntryId, standardId) pair (upsert-style) since the target entry
+// may already have some of these approved from Milestone 8.
+export async function insertApprovedLinks(rows) {
+  if (rows.length === 0) return []
+
+  const { data, error } = await supabase
+    .from('schedule_entry_standards')
+    .upsert(
+      rows.map((row) => ({
+        schedule_entry_id: row.scheduleEntryId,
+        standard_id: row.standardId,
+        status: 'approved',
+      })),
+      { onConflict: 'schedule_entry_id,standard_id', ignoreDuplicates: false }
+    )
+    .select()
+
+  if (error) throw error
+  return data
+}
+
+// Removes specific standard links from one schedule entry — used when a
+// revision drops a standard that IS safely covered elsewhere (the coverage
+// check found no risk, so no decision gate was needed).
+export async function deleteLinks(scheduleEntryId, standardIds) {
+  if (standardIds.length === 0) return
+
+  const { error } = await supabase
+    .from('schedule_entry_standards')
+    .delete()
+    .eq('schedule_entry_id', scheduleEntryId)
+    .in('standard_id', standardIds)
+
+  if (error) throw error
+}
+
 export async function approveLinks(ids) {
   const { error } = await supabase
     .from('schedule_entry_standards')

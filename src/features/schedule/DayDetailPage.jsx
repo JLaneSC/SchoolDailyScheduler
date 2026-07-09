@@ -6,6 +6,7 @@ import { useProgressNotes } from './useProgressNotes'
 import { useAiSuggestions } from './useAiSuggestions'
 import { useSaveActivityPlan } from './useSaveActivityPlan'
 import { DayScheduleEntryItem } from './DayScheduleEntryItem'
+import { NextDayRevisionPanel } from './NextDayRevisionPanel'
 
 export function DayDetailPage() {
   const { studentId, year, month, day } = useParams()
@@ -75,6 +76,10 @@ export function DayDetailPage() {
           )}
           {suggestionMessage && <p>{suggestionMessage}</p>}
         </div>
+      )}
+
+      {!isLoading && !error && dayEntries.length > 0 && (
+        <NextDayRevisionPanel studentId={studentId} sourceDate={dateStr} />
       )}
 
       <ul>
