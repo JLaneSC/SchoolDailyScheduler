@@ -5,6 +5,7 @@ import { SubjectsPage } from './features/subjects/SubjectsPage'
 import { SupplyListPage } from './features/supplyList/SupplyListPage'
 import { GradeBandsPage } from './features/gradeBands/GradeBandsPage'
 import { StandardsPage } from './features/standards/StandardsPage'
+import { CurriculumPlanPage } from './features/curriculumPlan/CurriculumPlanPage'
 import { SubjectPatternsPage } from './features/schedule/SubjectPatternsPage'
 import { SchoolYearPage } from './features/schedule/SchoolYearPage'
 import { CalendarPage, CalendarRedirect } from './features/schedule/CalendarPage'
@@ -30,6 +31,10 @@ function App() {
         <Route path="/students/:studentId/patterns" element={<SubjectPatternsPage />} />
         <Route path="/students/:studentId/school-year" element={<SchoolYearPage />} />
         <Route path="/students/:studentId/schedule" element={<CalendarRedirect />} />
+        <Route
+          path="/students/:studentId/curriculum-plan"
+          element={<CurriculumPlanPage />}
+        />
         <Route
           path="/students/:studentId/schedule/:year/:month"
           element={<CalendarPage />}

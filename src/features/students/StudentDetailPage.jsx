@@ -15,6 +15,9 @@ export function StudentDetailPage() {
         <li>
           <Link to={`/students/${studentId}/schedule`}>Calendar</Link>
         </li>
+        <li>
+          <Link to={`/students/${studentId}/curriculum-plan`}>Curriculum plan</Link>
+        </li>
       </ul>
     </section>
   )
