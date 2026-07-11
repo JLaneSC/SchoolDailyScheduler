@@ -6,13 +6,13 @@ import {
   updateEntry,
 } from './curriculumPlanApi'
 
-export function useCurriculumPlan({ studentId, status, year, month } = {}) {
+export function useCurriculumPlan({ studentId, status, year, month, generationRunId } = {}) {
   const queryClient = useQueryClient()
-  const queryKey = ['curriculumPlanEntries', { studentId, status, year, month }]
+  const queryKey = ['curriculumPlanEntries', { studentId, status, year, month, generationRunId }]
 
   const entriesQuery = useQuery({
     queryKey,
-    queryFn: () => getCurriculumPlanEntries({ studentId, status, year, month }),
+    queryFn: () => getCurriculumPlanEntries({ studentId, status, year, month, generationRunId }),
     enabled: Boolean(studentId),
   })
 

@@ -7,6 +7,7 @@ import { GradeBandsPage } from './features/gradeBands/GradeBandsPage'
 import { StandardsPage } from './features/standards/StandardsPage'
 import { CurriculumPlanPage } from './features/curriculumPlan/CurriculumPlanPage'
 import { StandardDistributionPage } from './features/standardDistribution/StandardDistributionPage'
+import { CurriculumGenerationPage } from './features/curriculumGeneration/CurriculumGenerationPage'
 import { SubjectPatternsPage } from './features/schedule/SubjectPatternsPage'
 import { SchoolYearPage } from './features/schedule/SchoolYearPage'
 import { CalendarPage, CalendarRedirect } from './features/schedule/CalendarPage'
@@ -35,6 +36,10 @@ function App() {
         <Route
           path="/students/:studentId/curriculum-plan"
           element={<CurriculumPlanPage />}
+        />
+        <Route
+          path="/students/:studentId/curriculum-plan/generate"
+          element={<CurriculumGenerationPage />}
         />
         <Route
           path="/students/:studentId/standard-distribution"

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { insertPendingEntries, matchApprovedStandardByCode } from './curriculumPlanApi'
 import { addSubject } from '../subjects/subjectsApi'
+import { findSchoolYearForDate } from '../schedule/schoolYearsApi'
 
 // Runs only after the user has explicitly confirmed a subject mapping
 // (existing subject or a named new one) for every distinct subject name
@@ -21,6 +22,10 @@ export function useSaveCurriculumPlanEntries() {
         }
       }
 
+      // Best-effort, opportunistic — never blocks a save if no school year
+      // matches this upload's year/month (e.g. no school year set up yet).
+      const schoolYearId = await findSchoolYearForDate(studentId, year, month)
+
       const rows = []
       for (let index = 0; index < entries.length; index++) {
         const entry = entries[index]
@@ -29,6 +34,7 @@ export function useSaveCurriculumPlanEntries() {
           studentId,
           subjectId: resolvedSubjectId.get(entry.subject),
           standardId,
+          schoolYearId,
           year,
           month,
           focusText: entry.focusText,

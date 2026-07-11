@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { useCurriculumPlan } from './useCurriculumPlan'
 import { useExtractCurriculumPlan } from './useExtractCurriculumPlan'
 import { useSaveCurriculumPlanEntries } from './useSaveCurriculumPlanEntries'
 import { useSubjects } from '../subjects/useSubjects'
+import { useGenerationRuns } from '../curriculumGeneration/useGenerationRuns'
 import { CurriculumPlanUploadForm } from './CurriculumPlanUploadForm'
 import { SubjectMappingForm } from './SubjectMappingForm'
 import { CurriculumPlanReviewItem } from './CurriculumPlanReviewItem'
@@ -47,6 +48,9 @@ function groupByMonthThenSubject(entries) {
 
 export function CurriculumPlanPage() {
   const { studentId } = useParams()
+  const location = useLocation()
+
+  const [selectedRunId, setSelectedRunId] = useState('')
 
   const {
     entries: pendingEntries,
@@ -55,7 +59,11 @@ export function CurriculumPlanPage() {
     updateEntry,
     approveEntries,
     rejectEntries,
-  } = useCurriculumPlan({ studentId, status: 'pending_review' })
+  } = useCurriculumPlan({
+    studentId,
+    status: 'pending_review',
+    generationRunId: selectedRunId || undefined,
+  })
 
   const { entries: approvedEntries, isLoading: isApprovedLoading } = useCurriculumPlan({
     studentId,
@@ -63,11 +71,12 @@ export function CurriculumPlanPage() {
   })
 
   const { subjects } = useSubjects()
+  const { generationRuns } = useGenerationRuns(studentId)
   const { extractCurriculumPlan, isExtracting, extractError } = useExtractCurriculumPlan()
   const { saveCurriculumPlanEntries, isSaving, saveError } = useSaveCurriculumPlanEntries()
 
   const [pendingExtraction, setPendingExtraction] = useState(null)
-  const [saveMessage, setSaveMessage] = useState(null)
+  const [saveMessage, setSaveMessage] = useState(location.state?.message ?? null)
 
   const pendingGroups = useMemo(() => groupByMonthThenSubject(pendingEntries), [pendingEntries])
   const approvedGroups = useMemo(() => groupByMonthThenSubject(approvedEntries), [approvedEntries])
@@ -100,6 +109,12 @@ export function CurriculumPlanPage() {
     <section>
       <h1>Curriculum plan</h1>
 
+      <p>
+        <Link to={`/students/${studentId}/curriculum-plan/generate`}>
+          Generate a curriculum from standards + the academic calendar &rarr;
+        </Link>
+      </p>
+
       {!pendingExtraction && (
         <>
           <h2>Extract from a curriculum document</h2>
@@ -129,6 +144,34 @@ export function CurriculumPlanPage() {
       )}
 
       <h2>Pending review</h2>
+
+      {generationRuns.length > 0 && (
+        <div>
+          <label htmlFor="generation-run-filter">Filter to a generation run</label>
+          <select
+            id="generation-run-filter"
+            value={selectedRunId}
+            onChange={(event) => setSelectedRunId(event.target.value)}
+          >
+            <option value="">All pending entries</option>
+            {generationRuns.map((run) => (
+              <option key={run.id} value={run.id}>
+                {new Date(run.created_at).toLocaleString()}
+                {run.used_prior_year_reuse ? ' (prior-year reuse)' : ''}
+              </option>
+            ))}
+          </select>
+          {selectedRunId && pendingEntries.length > 0 && (
+            <button
+              type="button"
+              onClick={() => approveEntries(pendingEntries.map((entry) => entry.id))}
+            >
+              Approve all {pendingEntries.length} entries from this run
+            </button>
+          )}
+        </div>
+      )}
+
       {isPendingLoading && <p>Loading...</p>}
       {pendingError && <p role="alert">Could not load curriculum plan: {pendingError.message}</p>}
       {!isPendingLoading && !pendingError && pendingEntries.length === 0 && (

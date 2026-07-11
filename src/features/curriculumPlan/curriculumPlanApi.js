@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabaseClient'
 
-export async function getCurriculumPlanEntries({ studentId, status, year, month } = {}) {
+export async function getCurriculumPlanEntries({ studentId, status, year, month, generationRunId } = {}) {
   let query = supabase
     .from('curriculum_plan_entries')
     .select('*, subjects(name)')
@@ -12,6 +12,7 @@ export async function getCurriculumPlanEntries({ studentId, status, year, month 
   if (status) query = query.eq('status', status)
   if (year) query = query.eq('year', year)
   if (month) query = query.eq('month', month)
+  if (generationRunId) query = query.eq('generation_run_id', generationRunId)
 
   const { data, error } = await query
   if (error) throw error
@@ -26,6 +27,7 @@ export async function insertPendingEntries(rows) {
         student_id: row.studentId,
         subject_id: row.subjectId,
         standard_id: row.standardId ?? null,
+        school_year_id: row.schoolYearId ?? null,
         year: row.year,
         month: row.month,
         focus_text: row.focusText,

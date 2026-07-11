@@ -13,6 +13,39 @@ export async function getSchoolYear(studentId) {
   return data
 }
 
+// All school years for a student, most recent first — used by curriculum
+// generation to detect and offer reuse of a prior year's mastered
+// standards. getSchoolYear() above intentionally stays single-row (every
+// other feature only ever cares about "the current" school year).
+export async function getSchoolYears(studentId) {
+  const { data, error } = await supabase
+    .from('school_years')
+    .select('*')
+    .eq('student_id', studentId)
+    .order('start_date', { ascending: false })
+
+  if (error) throw error
+  return data
+}
+
+// Best-effort lookup used to opportunistically stamp school_year_id onto
+// curriculum_plan_entries rows as they're created (both the Milestone 7
+// upload path and Milestone 10 generation) — never required, never blocks
+// a save if no match is found.
+export async function findSchoolYearForDate(studentId, year, month) {
+  const dateStr = `${year}-${String(month).padStart(2, '0')}-01`
+  const { data, error } = await supabase
+    .from('school_years')
+    .select('id')
+    .eq('student_id', studentId)
+    .lte('start_date', dateStr)
+    .gte('end_date', dateStr)
+    .maybeSingle()
+
+  if (error) throw error
+  return data?.id ?? null
+}
+
 export async function saveSchoolYear({
   id,
   studentId,
